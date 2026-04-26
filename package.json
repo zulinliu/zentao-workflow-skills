@@ -1,0 +1,41 @@
+{
+  "name": "zentao-workflow-skills",
+  "version": "2.2.0",
+  "description": "通过 npx 将 zentao-workflow 安装到 Codex、Claude Code、Gemini CLI、OpenCode、Windsurf 及兼容 Agent Skills 标准的主流 agent。",
+  "license": "UNLICENSED",
+  "private": false,
+  "type": "commonjs",
+  "bin": {
+    "zentao-workflow-skills": "bin/zentao-workflow-skills.js"
+  },
+  "files": [
+    "bin/*.js",
+    "lib/*.js",
+    "SKILL.md",
+    "scripts/chandao_fetch.py",
+    "scripts/requirements.txt",
+    "scripts/chandao_fetch/*.py"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test:npm": "node --test tests-node/*.test.js",
+    "publish:corp:dry-run": "npm publish --dry-run --registry http://npmreg.gzdevops.tsintergy.com/",
+    "publish:corp": "npm publish --registry http://npmreg.gzdevops.tsintergy.com/"
+  },
+  "publishConfig": {
+    "registry": "http://npmreg.gzdevops.tsintergy.com/"
+  },
+  "keywords": [
+    "agent-skill",
+    "zentao",
+    "codex",
+    "claude-code",
+    "cursor",
+    "opencode",
+    "windsurf",
+    "gemini-cli",
+    "superpowers"
+  ]
+}

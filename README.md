@@ -1,213 +1,335 @@
-# Zentao Workflow Skill
+# zentao-workflow-skills
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](https://github.com/zulinliu/zentao-workflow)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Skill-purple.svg)](https://claude.ai/code)
-[![Release](https://img.shields.io/github/release/zulinliu/zentao-workflow.svg)](https://github.com/zulinliu/zentao-workflow/releases)
+一个面向真实研发场景的通用 agent workflow 包。
 
-禅道开发工作流助手 - 自动化禅道需求/任务/Bug 下载与技术实现方案设计。
+它只做一件核心事情：把禅道内容稳定下载到本地工作区，并把结果交接给后续设计、计划、实现流程。当前运行时仍保持最小化：
 
-## 快速安装
+1. 全局初始化禅道配置到 `~/.chandao/config.properties`
+2. 将 story、task、bug 固定下载到当前工作区 `./chandao/`
+3. 将下载结果交给 superpowers 或当前 agent 的后续开发流程
 
-### 推荐方式：从 Releases 下载
+同时，这个仓库已经补齐了跨主流 agent 的 `npx` 安装器，支持按不同客户端的官方能力安装到原生目录或兼容目录。
 
-前往 [Releases 页面](https://github.com/zulinliu/zentao-workflow/releases) 下载最新版本的 `zentao-workflow-vx.x.x.zip`。
+## 当前范围
+
+- 下载器只保留 Python 实现
+- 禅道配置只允许使用 `~/.chandao/config.properties`
+- 下载目录固定为当前工作区 `./chandao/`
+- 禅道访问保持只读
+- 技能运行包只保留 `SKILL.md` 与 `scripts/`
+- `npx` 安装器负责生成各 agent 需要的技能目录、命令文件或子代理文件
+
+## 支持矩阵
+
+| 目标 | 安装模式 | 用户级目录 | 项目级目录 | 当前支持级别 |
+| --- | --- | --- | --- | --- |
+| `codex` | 官方 Agent Skills 目录 | `~/.agents/skills/zentao-workflow/` | `.agents/skills/zentao-workflow/` | 原生支持 |
+| `claude` | 官方 command + subagent + 本地运行时资源 | `~/.claude/commands/`、`~/.claude/agents/`、`~/.claude/agent-resources/zentao-workflow/` | `.claude/commands/`、`.claude/agents/`、`.claude/agent-resources/zentao-workflow/` | 原生适配 |
+| `gemini` | 官方 command + subagent + 本地运行时资源 | `~/.gemini/commands/`、`~/.gemini/agents/`、`~/.gemini/agent-resources/zentao-workflow/` | `.gemini/commands/`、`.gemini/agents/`、`.gemini/agent-resources/zentao-workflow/` | 原生适配 |
+| `opencode` | 原生 skill | `~/.config/opencode/skills/zentao-workflow/` | `.opencode/skills/zentao-workflow/` | 原生支持 |
+| `windsurf` | 原生 skill | `~/.codeium/windsurf/skills/zentao-workflow/` | `.windsurf/skills/zentao-workflow/` | 原生支持 |
+| `copilot` / `vscode` | 官方 Agent Skills 目录 | `~/.copilot/skills/zentao-workflow/` | `.github/skills/zentao-workflow/` | 原生支持 |
+| `agent-skills` | 通用 Agent Skills 目录 | `~/.agents/skills/zentao-workflow/` | `.agents/skills/zentao-workflow/` | 标准支持 |
+| `cursor` | 复用 Agent Skills open standard | `~/.agents/skills/zentao-workflow/` | `.agents/skills/zentao-workflow/` | 兼容模式 |
+| `trae` / `trae-cn` / `tran-cn` | 复用 Agent Skills open standard | `~/.agents/skills/zentao-workflow/` | `.agents/skills/zentao-workflow/` | 兼容模式 |
+
+说明：
+
+- `cursor` 与 `trae` 当前统一走 Agent Skills 兼容目录，目的是降低安装分叉，保持同一套运行时可被多客户端复用。
+- `claude` 与 `gemini` 没有被强行伪装成 skill；本项目为它们生成官方支持的命令和子代理包装层，并单独落一份运行时资源目录。
+- `codex` 当前按 OpenAI 官方 Agent Skills 目录安装；如果要做更广泛的产品化分发，Codex 官方更推荐 plugin 形态。
+- `all` 是安装器内置聚合目标，会一次安装到 `codex`、`claude`、`gemini`、`opencode`、`windsurf`、`copilot`、`agent-skills`。由于 `cursor`、`trae` 本身复用 `agent-skills`，执行 `all` 后它们也会覆盖到。
+
+## 环境准备
+
+### Python
+
+先确认 Python 可用：
 
 ```bash
-# Linux/macOS
-cd ~/.claude/skills
-unzip ~/Downloads/zentao-workflow-v1.5.0.zip -d zentao-workflow
-
-# Windows PowerShell
-cd $env:USERPROFILE\.claude\skills
-Expand-Archive $env:USERPROFILE\Downloads\zentao-workflow-v1.5.0.zip -DestinationPath zentao-workflow
+python --version
 ```
 
-重启 Claude Code 即可使用。
+如果当前环境没有 Python：
 
-### 其他方式
+- Windows：`winget install Python.Python.3.12`
+- macOS：`brew install python`
+- Ubuntu / Debian：`sudo apt update && sudo apt install -y python3 python3-pip`
 
-<details>
-<summary>方法二：从 GitHub 克隆</summary>
+再安装下载器依赖：
 
 ```bash
-git clone https://github.com/zulinliu/zentao-workflow.git
-cp -r zentao-workflow ~/.claude/skills/
+python -m pip install -r scripts/requirements.txt
 ```
 
-</details>
+如需单独检查 `requests`：
 
-<details>
-<summary>方法三：手动复制</summary>
+```bash
+python -c "import requests; print(requests.__version__)"
+```
 
-将整个项目目录复制到 Claude Code 技能目录：
-- Linux/macOS: `~/.claude/skills/`
-- Windows: `%USERPROFILE%\.claude\skills\`
+### Node / npm / npx
 
-</details>
+如需使用 `npx` 安装器，先确认 Node.js：
 
-## 环境要求
+```bash
+node --version
+npm --version
+```
 
-### 运行时（满足任一即可）
+如果当前环境没有 Node.js：
 
-| 运行时 | 版本要求 | 优先级 |
-|--------|----------|--------|
-| Java | 8+ | 高（优先使用） |
-| Python | 3.6+ | 中（默认备选） |
+- Windows：`winget install OpenJS.NodeJS.LTS`
+- macOS：`brew install node`
+- Ubuntu / Debian：`sudo apt update && sudo apt install -y nodejs npm`
 
-### 技能依赖（v1.5.0 新增）
+### superpowers
 
-| 依赖 | 版本要求 | 说明 |
-|------|----------|------|
-| superpowers 插件 | 5.0.6+ | 技术方案设计必需，如未安装会提示自动安装 |
+如果后续只执行下载，superpowers 不是必需项。
 
-## 功能特性
-
-- **智能触发** - 当提到"禅道"、"需求"、"任务"、"Bug"等关键词时自动激活
-- **双运行时支持** - 内置 Java 和 Python 两个版本，自动选择最佳运行时
-- **跨平台兼容** - 支持 Windows、macOS、Linux
-- **自动环境配置** - 无环境时可自动安装 Python
-- **交互式配置** - 引导用户完成禅道服务器配置
-- **附件完整下载** - 下载所有附件和内容中嵌入的图片
-
-### v1.5.0 重大更新
-
-- **集成 superpowers 技能链** - 技术方案设计效率提升 70%+
-  - 使用 `brainstorming` 技能进行需求分析和方案设计
-  - 使用 `subagent-driven-development` 技能执行编码任务
-  - 使用 `requesting-code-review` 技能进行代码评审
-- **合并架构方案和编码方案**
-  - 原两个独立阶段 → 合并为"技术实现方案设计"
-  - 消除重复探索，一次完成所有设计工作
-- **效率大幅提升**
-  - 代理数量减少 85%：12-17 个 → 1-2 个
-  - 简单需求耗时减少 70%：20+ 分钟 → 5-8 分钟
-
-<details>
-<summary>v1.4.x 历史功能</summary>
-
-### v1.4.0 功能
-- **方案质量自动评审**（可选）
-- **快速/深度模式选择**
-- **多项目配置支持**
-
-</details>
+如果还需要把下载结果继续交给设计、计划或开发流程，建议先确认 superpowers 已就绪，并按当前 agent 的官方安装入口完成安装。
 
 ## 快速开始
 
-```
-你: 帮我下载禅道需求 38817
+### 1. 使用 `npx` 查看支持目标
 
-Claude: [触发 zentao-workflow 技能]
-        检测运行环境...
-        ✓ Java 1.8.0 已检测到，使用 Java 版本
-
-        首次使用需要配置禅道信息...
-        ✓ 配置已完成
-
-        正在下载需求 38817...
-        ✓ 下载完成
-          - MD 文件: story/38817-需求标题.md
-          - 附件: 3 个文件已下载
-          - 图片: 2 张图片已下载
-
-        是否开始设计开发技术方案？
+```bash
+npx zentao-workflow-skills list-targets
 ```
 
-### 支持的输入格式
+### 2. 安装到目标 agent
 
-| 格式 | 示例 |
-|------|------|
-| 纯 ID | 38817 |
-| URL | https://zentao.example.com/story-view-38817.html |
-| 关键词+ID | 开发需求38817、任务12345 |
+安装到当前用户级 Codex：
 
-### 触发关键词
-
-- 禅道、zentao、chandao
-- 需求、开发需求、story
-- 任务、task
-- Bug、缺陷
-- 下载禅道、获取需求
-
-## 技术实现方案设计
-
-v1.5.0 使用 `superpowers:brainstorming` 技能，一次完成所有设计工作。
-
-| 指标 | v1.4.x | v1.5.0 | 提升 |
-|------|--------|--------|------|
-| 设计阶段 | 2 个（架构+编码） | 1 个（技术实现方案） | 减少 50% |
-| 代理数量 | 12-17 个 | 1-2 个 | 减少 85%+ |
-| 简单需求耗时 | 20+ 分钟 | 5-8 分钟 | 减少 70%+ |
-
-**技术实现方案包含**：
-1. **需求分析** - 背景、功能点拆解、验收标准
-2. **架构设计** - 技术选型、模块设计、接口设计
-3. **实现步骤** - 详细编码步骤（5-10 步）
-
-**执行方式选择**：
-- **子代理驱动**（推荐）- 使用 `superpowers:subagent-driven-development`
-- **内联执行** - 使用 `superpowers:executing-plans`
-- **手动执行** - 保留方案，手动实现
-
-## 输出文件结构
-
+```bash
+npx zentao-workflow-skills install --target codex
 ```
+
+安装到当前项目级 Claude Code：
+
+```bash
+npx zentao-workflow-skills install --target claude --scope project
+```
+
+安装到当前项目级 OpenCode 和 Windsurf：
+
+```bash
+npx zentao-workflow-skills install --target opencode,windsurf --scope project
+```
+
+安装到当前项目级 Cursor、Trae 兼容目录：
+
+```bash
+npx zentao-workflow-skills install --target cursor,trae --scope project
+```
+
+安装到当前项目级 GitHub Copilot / VS Code Agent：
+
+```bash
+npx zentao-workflow-skills install --target copilot --scope project
+```
+
+一次性安装全部主流目标：
+
+```bash
+npx zentao-workflow-skills install --target all --scope project
+```
+
+如目标目录已存在，增加 `--force`：
+
+```bash
+npx zentao-workflow-skills install --target all --scope project --force
+```
+
+如需先看写入计划，不真正落盘：
+
+```bash
+npx zentao-workflow-skills install --target claude,gemini --scope project --dry-run
+```
+
+### 3. 首次初始化禅道配置
+
+```bash
+python scripts/chandao_fetch.py --init
+```
+
+初始化后会在用户目录生成：
+
+```text
+~/.chandao/config.properties
+```
+
+配置中只允许保存本机私有地址、账号、密码；禁止提交真实凭据到仓库。
+
+### 4. 下载禅道内容
+
+```bash
+python scripts/chandao_fetch.py -t story -i 39382
+python scripts/chandao_fetch.py -t task -i 61563
+python scripts/chandao_fetch.py -t bug -i 66445
+```
+
+### 5. 继续进入设计或开发
+
+在当前 agent 中直接描述目标即可，例如：
+
+```text
+帮我下载禅道需求 39382，并基于下载结果继续设计和实现
+```
+
+## 下载行为
+
+- `task` 描述为空时，会自动补充下载关联需求和父任务
+- `--no-attachment` 与 `--no-image` 独立生效
+- HTTP 请求超时会真实传递到 `requests`
+- 附件和图片文件名会做跨平台清理，避免 Windows 非法字符问题
+
+## 输出结构
+
+所有下载结果固定落在当前工作区 `chandao/` 目录：
+
+```text
 {workspace}/
-├── .chandao/
-│   └── config.properties          # 工作区配置（可选）
-├── story_39382_技术实现方案.md    # 技术实现方案文档（v1.5.0 新格式）
-├── story/                         # 需求 Markdown 文件
-│   └── 39382-需求标题.md
-├── task/                          # 任务 Markdown 文件
-│   └── 12345-任务名称.md
-├── bug/                           # Bug Markdown 文件
-│   └── 67890-Bug标题.md
-└── attachments/                   # 附件目录
-    ├── story/39382/
-    ├── task/12345/
-    └── bug/67890/
+└── chandao/
+    ├── story/
+    ├── task/
+    ├── bug/
+    └── attachments/
 ```
 
-## 常见问题
+示例：
 
-### Q: 没有安装 Java 或 Python 怎么办？
+```text
+{workspace}/chandao/story/39382-需求标题.md
+{workspace}/chandao/task/61563-任务标题.md
+{workspace}/chandao/bug/66445-Bug标题.md
+{workspace}/chandao/attachments/task/61563/
+```
 
-技能会自动检测并提示安装。默认推荐安装 Python（更轻量）。
+## 手工分发与最小运行包
 
-### Q: 如何修改已保存的配置？
+### 直接复制目录
 
-编辑 `~/.chandao/config.properties` 文件。
+对原生支持 skill 的客户端，也可以直接复制最小运行包到对应目录。最小运行包只要求：
 
-### Q: 下载失败怎么办？
+- `SKILL.md`
+- `scripts/chandao_fetch.py`
+- `scripts/requirements.txt`
+- `scripts/chandao_fetch/`
 
-常见原因：
-1. 网络无法访问禅道服务器
-2. 用户名或密码错误
-3. ID 不存在或无权限访问
+### 生成 zip 运行包
 
-## 版本历史
+```bash
+python scripts/package_skill.py
+```
 
-| 版本 | 主要更新 |
-|------|----------|
-| 1.5.0 | 集成 superpowers 技能链、合并架构/编码方案、效率提升 70%+ |
-| 1.4.1 | 触发条件优化、Java 源码管理、文档同步 |
-| 1.4.0 | 方案质量自动评审、子代理数量优化 |
-| 1.3.0 | 多项目配置支持 |
-| 1.2.0 | 快速/深度模式选择、进度提示 |
-| 1.1.x | 交互优化、跨平台兼容性修复 |
-| 1.0.0 | 初始版本 |
+默认会生成：
 
-查看 [CHANGELOG.md](CHANGELOG.md) 获取详细更新记录。
+```text
+dist/zentao-workflow-skills-v2.2.0.zip
+```
 
-## 许可证
+该 zip 只适合 skill 目录式分发；像 Claude Code、Gemini CLI 这种需要命令或子代理包装层的客户端，仍建议优先使用 `npx` 安装器。
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+## 更新与卸载
 
-## 作者
+### 更新
 
-- **liuzl** - [GitHub](https://github.com/zulinliu)
+`npx` 安装方式的更新，直接重跑原安装命令并增加 `--force`：
 
----
+```bash
+npx zentao-workflow-skills install --target all --scope project --force
+```
 
-**版本**: 1.5.0 | **作者**: liuzl | **许可证**: MIT
+更新不会修改用户自己的 `~/.chandao/config.properties`。
+
+### 卸载
+
+按对应目标删除目录或包装文件即可：
+
+- skill 模式目标：删除对应的 `zentao-workflow/` 目录
+- Claude Code：删除 `.claude/commands/zentao-workflow.md`、`.claude/agents/zentao-workflow.md`、`.claude/agent-resources/zentao-workflow/`
+- Gemini CLI：删除 `.gemini/commands/zentao-workflow.toml`、`.gemini/agents/zentao-workflow.md`、`.gemini/agent-resources/zentao-workflow/`
+
+## 开发与验证
+
+Python 测试：
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Node 安装器测试：
+
+```bash
+node --test tests-node/*.test.js
+```
+
+本地 npm 打包：
+
+```bash
+npm pack
+```
+
+本地 `npx` 烟测：
+
+```bash
+npx --yes .\zentao-workflow-skills-2.2.0.tgz install --target codex --scope project
+```
+
+私库发版前演练：
+
+```bash
+npm run publish:corp:dry-run
+```
+
+## 私库发布
+
+公司私库地址固定为：
+
+```text
+http://npmreg.gzdevops.tsintergy.com/
+```
+
+建议发布流程：
+
+1. 更新 [VERSION](D:/Agent/CodexProject/zentao-workflow-skills/VERSION)
+2. 更新 [package.json](D:/Agent/CodexProject/zentao-workflow-skills/package.json) 的 `version`
+3. 更新 [CHANGELOG.md](D:/Agent/CodexProject/zentao-workflow-skills/CHANGELOG.md)
+4. 运行 Python 测试
+5. 运行 Node 安装器测试
+6. 执行 `npm pack`
+7. 执行 `npm run publish:corp:dry-run`
+8. 确认已登录公司私库
+9. 执行 `npm run publish:corp`
+
+如果当前机器尚未登录私库，可执行：
+
+```bash
+npm adduser --registry http://npmreg.gzdevops.tsintergy.com/
+```
+
+如果使用方机器的默认 npm registry 已经指向公司私库，发布成功后可直接通过：
+
+```bash
+npx zentao-workflow-skills install --target all --scope project
+```
+
+或显式指定公司私库：
+
+```bash
+npx --registry http://npmreg.gzdevops.tsintergy.com/ zentao-workflow-skills install --target all --scope project
+```
+
+## 安全约束
+
+- 不在仓库中保存真实禅道地址、账号、密码或其他凭据
+- 不创建工作区级 `.chandao` 配置
+- 私库发布不提交 `.npmrc` 凭据
+- 下载器保持只读，不执行禅道写操作
+
+## 后续建议
+
+- 继续增加真实禅道接口回归样例
+- 为更多客户端补充“官方原生入口”而不是兼容入口
+- 在私库发版后补一轮使用侧回归，确认各 agent 的自动发现行为一致

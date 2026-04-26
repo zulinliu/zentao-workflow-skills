@@ -5,6 +5,8 @@ __pycache__/
 *.so
 .Python
 build/
+dist/
+*.tgz
 develop-eggs/
 dist/
 downloads/
@@ -22,10 +24,12 @@ wheels/
 
 # Virtual environments
 .env
+.env.*
 .venv
 env/
 venv/
 ENV/
+!.env.example
 
 # IDE
 .idea/
@@ -40,11 +44,18 @@ Thumbs.db
 
 # Project specific
 *.log
-chandao-data/
-chandao-data-*/
-attachments/
-
-# Development only (only in dev branch, not merged to main)
-# CLAUDE.md - development guide, stays in dev branch
-# .release-ignore - packaging exclude list
-# references/*.md - detailed guides for development
+chandao/
+.chandao/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.cache/
+node_modules/
+*.pem
+*.key
+*.p12
+*.crt
+*.der
