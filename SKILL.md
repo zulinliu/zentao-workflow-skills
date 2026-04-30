@@ -1,173 +1,61 @@
 ---
 name: zentao-workflow
 description: |
-  禅道工作流助手 v2.2.0。
+  禅道工作流助手。用于下载、同步或整理禅道内容，并把 story、task、bug 固定导出到当前工作区 ./chandao/。
 
-  当用户提到禅道、zentao、chandao、需求、story、任务、task、Bug、缺陷、禅道链接、
-  下载禅道内容、同步禅道、基于禅道内容开始设计或开发时，必须使用此技能。
-
-  本技能聚焦三件事：
-  1. 首次初始化 ~/.chandao/config.properties
-  2. 用 Python 下载器把禅道内容固定下载到当前工作区 ./chandao/
-  3. 将下载结果移交给 superpowers 进入 brainstorming / writing-plans / implementation
+  当用户提到禅道、zentao、chandao、需求、story、任务、task、Bug、缺陷、禅道链接、下载禅道内容、同步禅道、基于禅道内容开始设计或开发时使用。
 ---
 
 # 禅道工作流助手
 
-## 目标
+## 核心职责
 
-把禅道内容稳定下载到工作区，并将结果以适合开发的形式交给 superpowers。
+- 初始化或复用用户级禅道配置 `~/.chandao/config.properties`
+- 通过 Python 下载器只读获取禅道 story、task、bug
+- 将结果固定写入当前工作区 `./chandao/`
+- 汇总主文件、附件目录和关联上下文，供后续设计或开发使用
 
-## 核心原则
+## 使用原则
 
-- 下载器通过 Python 命令行提供
-- 所有脚本路径都相对当前技能根目录解析
-- 禅道配置只认 `~/.chandao/config.properties`
-- 下载输出固定为当前工作区 `./chandao/`
-- 禅道访问保持只读
-- superpowers 负责后续设计、计划、执行
+- 从当前技能根目录解析所有脚本路径，不假设仓库源码就在用户工作区
+- 不创建工作区级 `.chandao` 配置，不支持自定义输出目录
+- 不在对话、文档、提交或错误信息中暴露真实禅道地址、账号、密码
+- 不复制后续规划/执行技能的完整流程，只交接下载产物和必要上下文
+- 用户只要求下载时，到结果汇总即结束
 
-## 执行步骤
+## 渐进式加载
 
-### Step 1: 检查基础环境
-
-先检查 Python 是否可用：
-
-```bash
-python --version
-```
-
-再检查下载依赖是否可用：
-
-```bash
-python -c "import requests; print(requests.__version__)"
-```
-
-如果 Python 缺失：
-
-- Windows：`winget install Python.Python.3.12`
-- macOS：`brew install python`
-- Ubuntu/Debian：`sudo apt update && sudo apt install -y python3 python3-pip`
-
-如果 `requests` 缺失：
-
-```bash
-python -m pip install -r scripts/requirements.txt
-```
-
-### Step 2: 检查 superpowers 是否可用
-
-如果用户只想下载，可以继续执行下载流程。
-
-如果用户还要继续设计、计划或开发：
-
-- 检查 `superpowers` 是否已安装
-- 如果未安装，先引导用户完成安装，再继续后续流程
-- 按当前 agent 的插件、skills 或 extensions 管理方式进行检查
-- 如环境支持命令式安装入口，则使用该 agent 的官方安装方式
-- Codex、Claude Code 等环境都应按各自原生安装入口处理
-
-### Step 3: 检查并初始化禅道配置
-
-只使用全局配置：
+先只阅读本文件。只有在需要实际初始化、下载、排查下载错误或确认命令细节时，再读取：
 
 ```text
-~/.chandao/config.properties
+references/download-workflow.md
 ```
 
-配置文件内容固定为：
+不要预加载测试、README、CHANGELOG 或其它开发文档。
 
-```properties
-zentao.url=https://zentao.example.invalid
-zentao.username=your_username
-zentao.password=your_password
-```
+## 最小执行流程
 
-如果配置不存在：
+1. 判断用户要下载的类型与 ID：`story`、`task`、`bug`
+2. 如配置缺失，按 `references/download-workflow.md` 初始化 `~/.chandao/config.properties`
+3. 在用户当前工作区执行下载命令
+4. 汇总 `./chandao/` 下生成的 Markdown 文件和附件目录
+5. 用户要求继续设计或开发时，再把下载结果作为上下文交给当前 agent 或可用的后续工作流
 
-1. 一次性向用户收集禅道地址、账号、密码
-2. 创建 `~/.chandao/config.properties`
-3. 告知后续会复用这份配置
-4. 强调示例值仅作占位，禁止把真实凭据写入仓库
+## 下载约束
 
-不要在仓库内创建包含凭据的本地配置文件，也不要让用户配置下载目录。
-
-### Step 4: 解析用户要下载的禅道内容
-
-支持以下输入：
-
-- 纯 ID：`39382`
-- 类型 + ID：`需求39382`、`task 61563`、`bug 66445`
-- 禅道链接：`story-view-39382`、`task-view-61563`、`bug-view-66445`
-
-如果用户同时要求下载多个内容：
-
-- 可以下载
-- 但如果后续要进入开发，提醒用户最好逐个进入设计和实现
-
-### Step 5: 执行下载
-
-使用固定命令：
-
-```bash
-python scripts/chandao_fetch.py -t {type} -i {id}
-```
-
-或批量：
-
-```bash
-python scripts/chandao_fetch.py -t {type} --ids {id1},{id2}
-```
-
-关键约束：
-
-- 不要传自定义输出目录
-- 下载结果固定落在当前工作区 `./chandao/`
+- 单个内容使用 `-t <story|task|bug> -i <id>`
+- 批量同类型内容使用 `-t <story|task|bug> --ids <id1,id2>`
 - `task` 描述为空时，下载器会自动补充关联需求和父任务
-
-### Step 6: 汇总下载结果
-
-下载完成后，至少给出：
-
-- 主文件路径
-- 附件目录路径
-- 如果是空描述任务，补充说明关联需求、父任务也已下载
-
-输出结构参考：
-
-```text
-{workspace}/chandao/story/{id}-标题.md
-{workspace}/chandao/task/{id}-标题.md
-{workspace}/chandao/bug/{id}-标题.md
-{workspace}/chandao/attachments/{type}/{id}/
-```
-
-### Step 7: 决定是否进入 superpowers 工作流
-
-如果用户只要下载，到这里结束。
-
-如果用户要继续设计、计划或开发：
-
-1. 先把已下载文件路径、标题、关联文件路径整理成上下文
-2. 调用 `superpowers:brainstorming`
-3. 让 superpowers 按自己的标准流程继续：
-   - `brainstorming`
-   - `writing-plans`
-   - `subagent-driven-development` 或 `executing-plans`
-
-不要在本技能里重复描述 superpowers 的内部工作流，也不要额外定义平行流程。
+- `--no-attachment` 和 `--no-image` 可独立控制附件与正文图片
+- 下载器保持只读，不执行新增、修改、删除等禅道写操作
 
 ## 输出要求
 
-每次执行后都应让用户清楚看到：
+每次执行后，用简短中文说明：
 
-- 配置是否已初始化
-- Python 与依赖是否已就绪
-- 本次下载到了哪个工作区目录
-- 生成了哪些主文件
-- 后续是“结束下载”还是“继续进入 superpowers”
-
-## 注意事项
-
-- 不在仓库内保存真实禅道地址、账号、密码或其他凭据
-- 不创建工作区级 `.chandao` 配置
+- 配置是否已就绪
+- 下载发生在哪个工作区
+- 生成了哪些主 Markdown 文件
+- 附件目录在哪里
+- 是否补充下载了关联需求或父任务
+- 后续是结束下载，还是继续进入设计/计划/实现

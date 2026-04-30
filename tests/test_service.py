@@ -66,7 +66,7 @@ class ServiceTest(unittest.TestCase):
             config = ChandaoConfig()
             config.base_url = "https://zentao.example.invalid"
             config.username = "tester"
-            config.password = "secret"
+            config.password = "dummy-password"
             config.output_dir = temp_dir
 
             service = ChandaoService(config)

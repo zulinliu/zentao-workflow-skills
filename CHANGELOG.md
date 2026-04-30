@@ -1,20 +1,27 @@
 # Changelog
 
+## 2.3.0 - 2026-04-30
+
+- 移除 npm、npx、Node 安装器与相关测试，项目回到离线 skill 包分发模型
+- 新增 `agents/openai.yaml`，补齐 agent skill 推荐的界面元数据
+- 新增 `references/download-workflow.md`，将下载细节从 `SKILL.md` 拆出，支持渐进式加载
+- 精简 `SKILL.md`，保留触发条件、职责边界、执行原则和输出要求
+- 更新 `scripts/package_skill.py`，生成 `zentao-workflow-v<version>.zip` 离线运行包
+- 加强错误信息脱敏，避免在常见失败路径输出完整禅道 URL 或响应正文
+- 清理旧 npm 文档、私库发布说明、构建残留与过时目录说明
+
 ## 2.2.0 - 2026-04-26
 
-- 将 `npx` 安装器扩展为多目标架构，支持 `codex`、`claude`、`gemini`、`opencode`、`windsurf`、`agent-skills`
-- 新增 `cursor`、`copilot`、`vscode`、`trae`、`trae-cn`、`tran-cn` 等目标与兼容别名
-- 为 Claude Code 生成官方命令与子代理包装层，并单独落地运行时资源目录
-- 为 Gemini CLI 生成官方命令与子代理包装层，并单独落地运行时资源目录
-- 将 Codex 安装目录校正为官方 Agent Skills 路径，并将 GitHub Copilot / VS Code Agent 调整为原生技能目录
-- 增加 `all` 聚合安装目标、`--dry-run` 安装演练、私库发布脚本与私库发版说明
-- 重写 README，补齐主流 agent 支持矩阵、安装模式、更新与卸载、私库发版流程
+- 曾扩展 `npx` 安装器为多目标架构，支持多个 agent 目标和兼容别名
+- 曾为 Claude Code、Gemini CLI 等目标生成包装层和运行时资源目录
+- 曾补充私库 npm 发版说明与安装矩阵
+- 以上 npm 安装路径已在 2.3.0 移除，仅保留历史记录
 
 ## 2.1.0 - 2026-04-26
 
-- 新增 `npx zentao-workflow-skills` 安装器，支持安装到 Codex、Claude Code 与通用 Agent Skills 标准目录
-- 新增 Node 侧安装测试与版本一致性校验
-- 将 `SKILL.md` 中的运行命令改为相对技能根目录解析，去掉无效的 `{SKILL_DIR}` 占位符
+- 曾新增 `npx zentao-workflow-skills` 安装器和 Node 侧测试
+- 将 `SKILL.md` 中的运行命令改为相对技能根目录解析
+- 以上 Node 安装器内容已在 2.3.0 移除，仅保留历史记录
 
 ## 2.0.0 - 2026-04-26
 
@@ -23,11 +30,10 @@
 - 下载输出固定为当前工作区 `./chandao/`
 - 修复 `requests` 超时配置未真正生效的问题
 - 修复 `--no-attachment` 与 `--no-image` 逻辑耦合的问题
-- 补上“任务描述为空时自动下载关联需求和父任务”的真实实现
+- 实现任务描述为空时自动下载关联需求和父任务
 - 新增单元测试，覆盖配置、CLI、超时、子任务关联下载
-- 新增本地打包脚本，并将发布包收敛为仅包含 `SKILL.md` 与 `scripts/` 的最小技能结构
+- 新增本地打包脚本，并将发布包收敛为最小技能结构
 - 重写 `SKILL.md`、`README.md`、`AGENTS.md`
-- 删除许可证、发布、作者、GitHub Release 等非核心仓库信息
 
 ## 1.6.0 - 2026-04-02
 
@@ -36,7 +42,7 @@
 
 ## 1.5.0 - 2025-03-27
 
-- 首次接入 superpowers 技能链
+- 首次接入后续开发技能链
 - 将方案输出收敛为“技术实现方案”
 
 ## 1.0.0 - 2025-03-26

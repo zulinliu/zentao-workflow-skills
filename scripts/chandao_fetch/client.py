@@ -31,7 +31,7 @@ class ChandaoClient:
         )
 
         self.session.headers.update({
-            "User-Agent": "zentao-workflow-python/2.0",
+            "User-Agent": "zentao-workflow-python",
             "Accept": "application/json",
         })
 
@@ -72,7 +72,7 @@ class ChandaoClient:
         self._ensure_logged_in()
         response = self._request("get", url)
         if not response.ok:
-            raise Exception(f"请求失败: {url} HTTP {response.status_code}")
+            raise Exception(f"请求失败: HTTP {response.status_code}")
 
         body = self._read_json(response)
         data = body.get("data", body)
@@ -231,7 +231,10 @@ class ChandaoClient:
 
     def _request(self, method: str, url: str, **kwargs) -> requests.Response:
         """统一发起请求，确保超时配置真正生效。"""
-        return self.session.request(method, url, timeout=self.timeout, **kwargs)
+        try:
+            return self.session.request(method, url, timeout=self.timeout, **kwargs)
+        except requests.RequestException:
+            raise Exception("禅道请求失败，请检查网络、地址、登录状态或接口权限。") from None
 
     @staticmethod
     def _read_json(response: requests.Response) -> dict:
@@ -239,5 +242,4 @@ class ChandaoClient:
         try:
             return response.json()
         except ValueError as exc:
-            preview = response.text[:200].replace("\n", " ").strip()
-            raise Exception(f"禅道返回了非 JSON 响应: {preview}") from exc
+            raise Exception("禅道返回了非 JSON 响应，请检查地址、登录状态或接口权限。") from exc

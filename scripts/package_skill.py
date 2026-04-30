@@ -12,9 +12,11 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_ROOT_NAME = "zentao-workflow-skills"
+PACKAGE_ROOT_NAME = "zentao-workflow"
 PACKAGE_ITEMS = [
     "SKILL.md",
+    "agents/openai.yaml",
+    "references/download-workflow.md",
     "scripts/chandao_fetch.py",
     "scripts/requirements.txt",
     "scripts/chandao_fetch",
@@ -77,7 +79,7 @@ def package_skill(output_dir: Path, project_root: Path = PROJECT_ROOT) -> Path:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="打包 zentao-workflow-skills 发布压缩包")
+    parser = argparse.ArgumentParser(description="打包 zentao-workflow 离线 Skill 发布包")
     parser.add_argument(
         "--output-dir",
         default=str(PROJECT_ROOT / "dist"),

@@ -1,14 +1,12 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-dist/
-*.tgz
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -42,7 +40,9 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Generated artifacts
+dist/
+*.tgz
 *.log
 chandao/
 .chandao/
@@ -54,6 +54,8 @@ htmlcov/
 .ruff_cache/
 .cache/
 node_modules/
+
+# Secrets and certificates
 *.pem
 *.key
 *.p12

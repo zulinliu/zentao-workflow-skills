@@ -24,7 +24,7 @@ class ChandaoConfigTest(unittest.TestCase):
                         "请输入禅道地址: ": "https://zentao.example.invalid/",
                         "请输入禅道账号: ": "tester",
                     }[prompt],
-                    getpass_func=lambda prompt: "secret",
+                    getpass_func=lambda prompt: "dummy-password",
                 )
 
                 saved_file = fake_home / ".chandao" / "config.properties"
@@ -33,7 +33,7 @@ class ChandaoConfigTest(unittest.TestCase):
                 loaded = ChandaoConfig.load()
                 self.assertEqual(loaded.base_url, "https://zentao.example.invalid")
                 self.assertEqual(loaded.username, "tester")
-                self.assertEqual(loaded.password, "secret")
+                self.assertEqual(loaded.password, "dummy-password")
 
     def test_initialize_interactively_force_prompt_overwrites_existing_values(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -41,7 +41,7 @@ class ChandaoConfigTest(unittest.TestCase):
             config = ChandaoConfig()
             config.base_url = "https://old.example.invalid"
             config.username = "old-user"
-            config.password = "old-secret"
+            config.password = "old-dummy-password"
 
             with patch("scripts.chandao_fetch.config.Path.home", return_value=fake_home):
                 config.initialize_interactively(
@@ -49,14 +49,14 @@ class ChandaoConfigTest(unittest.TestCase):
                         "请输入禅道地址: ": "https://new.example.invalid",
                         "请输入禅道账号: ": "new-user",
                     }[prompt],
-                    getpass_func=lambda prompt: "new-secret",
+                    getpass_func=lambda prompt: "new-dummy-password",
                     force_prompt=True,
                 )
 
                 loaded = ChandaoConfig.load()
                 self.assertEqual(loaded.base_url, "https://new.example.invalid")
                 self.assertEqual(loaded.username, "new-user")
-                self.assertEqual(loaded.password, "new-secret")
+                self.assertEqual(loaded.password, "new-dummy-password")
 
 
 if __name__ == "__main__":

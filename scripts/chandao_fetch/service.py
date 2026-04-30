@@ -163,6 +163,7 @@ class ChandaoService:
 
                 print(f"下载图片: {filename} -> {file_path}")
             except Exception as e:
-                print(f"下载图片失败: {src}: {e}")
+                filename = filename_from_url(src, fallback="image")
+                print(f"下载图片失败: {filename}: {e}")
 
         return content

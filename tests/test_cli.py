@@ -12,7 +12,7 @@ class CliTest(unittest.TestCase):
         config = ChandaoConfig()
         config.base_url = "https://zentao.example.invalid"
         config.username = "tester"
-        config.password = "secret"
+        config.password = "dummy-password"
         return config
 
     def test_collect_ids_keeps_order_and_deduplicates(self):
@@ -61,7 +61,7 @@ class CliTest(unittest.TestCase):
                         "--init",
                         "--url", "https://zentao.example.invalid",
                         "--username", "tester",
-                        "--password", "secret",
+                        "--password", "dummy-password",
                     ]), \
                     patch("os.getcwd", return_value=temp_dir):
                 main()
