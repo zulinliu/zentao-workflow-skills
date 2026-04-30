@@ -2,13 +2,23 @@
 
 一个最小化的禅道 agent skill 项目，用于把禅道 story、task、bug 只读下载到本地工作区，并把结果交给后续设计、计划或实现流程。
 
+该技能不绑定特定 agent。只要目标环境支持 skills 或等价的技能目录机制，就可以使用同一份离线运行包，例如 Claude Code、Codex、Cursor、Trae、OpenCode 等。
+
 ## 当前范围
 
 - 下载器只保留 Python 实现
 - 禅道配置只使用 `~/.chandao/config.properties`
 - 下载结果固定写入当前工作区 `./chandao/`
-- 发布物只提供离线 skill 压缩包，不再提供 npm、npx 或 Node 安装器
+- 发布物提供离线 skill 压缩包
 - 运行包只包含 `SKILL.md`、`agents/openai.yaml`、`references/` 和 `scripts/`
+- `agents/openai.yaml` 仅提供可选界面元数据；不读取该文件的 agent 可安全忽略，核心入口仍是 `SKILL.md`
+
+## 适用范围
+
+- 支持任意具备 skills 能力或等价技能目录机制的 agent
+- 典型使用方包括 Claude Code、Codex、Cursor、Trae、OpenCode 等
+- 本项目不维护平台专属安装矩阵；各客户端按自身技能目录约定放置 `zentao-workflow/` 目录
+- 不要求客户端支持特定插件格式，只要求能读取 `SKILL.md` 并允许执行随包脚本
 
 ## 运行结构
 
@@ -59,7 +69,7 @@ python -c "import requests; print(requests.__version__)"
 
 ### 2. 复制到目标技能目录
 
-将完整的 `zentao-workflow/` 目录复制到目标 agent 支持的技能目录。不同客户端的技能目录由客户端自身约定，本项目不再维护自动探测或自动安装逻辑。
+将完整的 `zentao-workflow/` 目录复制到目标 agent 支持的技能目录。不同客户端的技能目录由客户端自身约定，本项目不维护自动探测或自动安装逻辑。
 
 通用目录形态：
 
@@ -104,7 +114,7 @@ zentao.username=your_username
 zentao.password=your_password
 ```
 
-禁止把真实禅道地址、账号、密码或 `.npmrc`、证书、密钥等凭据提交到仓库。
+禁止把真实禅道地址、账号、密码、证书、密钥等凭据提交到仓库。
 
 ## 下载使用
 
@@ -213,11 +223,11 @@ python scripts/package_skill.py
 - 不在仓库中保存真实禅道地址、账号、密码或其它凭据
 - 不创建工作区级 `.chandao` 配置
 - 不提交下载结果 `chandao/`、构建产物 `dist/` 或压缩包
-- 不提交 `.npmrc`、证书、私钥、Token 等敏感文件
+- 不提交证书、私钥、Token 等敏感文件
 - 下载器保持只读，不执行禅道写操作
 
 ## 维护原则
 
 - 修改下载结果格式时，同步更新 `README.md`、`SKILL.md`、`references/download-workflow.md` 和 `CHANGELOG.md`
 - 修改运行包内容时，同步更新 `scripts/package_skill.py` 与 `tests/test_package_skill.py`
-- 不重新引入 npm、npx、Node 安装器或客户端自动安装矩阵
+- 保持离线 skill 包分发，不维护平台专属自动安装逻辑

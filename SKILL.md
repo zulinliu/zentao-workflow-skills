@@ -3,6 +3,8 @@ name: zentao-workflow
 description: |
   禅道工作流助手。用于下载、同步或整理禅道内容，并把 story、task、bug 固定导出到当前工作区 ./chandao/。
 
+  适用于支持 skills 或等价技能目录机制的 agent，包括 Claude Code、Codex、Cursor、Trae、OpenCode 等；不绑定单一 agent。
+
   当用户提到禅道、zentao、chandao、需求、story、任务、task、Bug、缺陷、禅道链接、下载禅道内容、同步禅道、基于禅道内容开始设计或开发时使用。
 ---
 
@@ -14,10 +16,12 @@ description: |
 - 通过 Python 下载器只读获取禅道 story、task、bug
 - 将结果固定写入当前工作区 `./chandao/`
 - 汇总主文件、附件目录和关联上下文，供后续设计或开发使用
+- 在不同支持 skills 的 agent 中保持同一套执行规则和输出约束
+- 将 `agents/openai.yaml` 视为可选界面元数据；不影响其它 agent 使用 `SKILL.md`
 
 ## 使用原则
 
-- 从当前技能根目录解析所有脚本路径，不假设仓库源码就在用户工作区
+- 从当前技能根目录解析所有脚本路径，不假设仓库源码就在用户工作区，也不假设特定 agent 的安装目录
 - 不创建工作区级 `.chandao` 配置，不支持自定义输出目录
 - 不在对话、文档、提交或错误信息中暴露真实禅道地址、账号、密码
 - 不复制后续规划/执行技能的完整流程，只交接下载产物和必要上下文
