@@ -7,6 +7,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from .utils import sanitize_filename
+
 
 @dataclass
 class Attachment:
@@ -22,15 +24,25 @@ class Attachment:
     def file_name(self) -> str:
         """获取文件名"""
         if self.title and self.extension:
-            return f"{self.title}.{self.extension}"
+            extension = self.extension.lstrip(".")
+            if self.title.lower().endswith(f".{extension.lower()}"):
+                return self.title
+            return f"{self.title}.{extension}"
+        if self.title:
+            return self.title
         if self.pathname:
             return self.pathname.split("/")[-1]
         return "unknown"
 
+    @property
+    def safe_file_name(self) -> str:
+        """获取适合写入本地文件系统的附件名。"""
+        return sanitize_filename(self.file_name, fallback="unknown")
+
     def is_image(self) -> bool:
         """判断是否为图片"""
         image_extensions = {"jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"}
-        return self.extension and self.extension.lower() in image_extensions
+        return bool(self.extension and self.extension.lower() in image_extensions)
 
     @classmethod
     def from_dict(cls, data: dict) -> "Attachment":

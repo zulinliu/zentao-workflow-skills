@@ -6,7 +6,8 @@
 使用方法:
     python chandao_fetch.py -t story -i 38817
     python chandao_fetch.py -t task --ids 12345,12346
-    python chandao_fetch.py -t bug -i 67890 -o ~/my-output
+    python chandao_fetch.py --init
+    python chandao_fetch.py -t bug -i 67890
 """
 
 import sys

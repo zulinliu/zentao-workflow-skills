@@ -1,12 +1,12 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -22,10 +22,12 @@ wheels/
 
 # Virtual environments
 .env
+.env.*
 .venv
 env/
 venv/
 ENV/
+!.env.example
 
 # IDE
 .idea/
@@ -38,13 +40,22 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Project specific
+# Generated artifacts
+dist/
 *.log
-chandao-data/
-chandao-data-*/
-attachments/
+chandao/
+.chandao/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.cache/
 
-# Development only (only in dev branch, not merged to main)
-# CLAUDE.md - development guide, stays in dev branch
-# .release-ignore - packaging exclude list
-# references/*.md - detailed guides for development
+# Secrets and certificates
+*.pem
+*.key
+*.p12
+*.crt
+*.der
