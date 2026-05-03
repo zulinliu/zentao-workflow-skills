@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -r scripts/requirements.txt
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Verify CLI
+        run: python -m scripts.chandao_fetch --help
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Package skill
+        run: python scripts/package_skill.py
+
+      - name: Verify zip contents
+        run: |
+          VERSION=$(cat VERSION | tr -d '[:space:]')
+          ZIP="dist/zentao-workflow-v${VERSION}.zip"
+          echo "Archive: ${ZIP}"
+          unzip -l "${ZIP}"
+          test -f "${ZIP}" || exit 1
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/*.zip
