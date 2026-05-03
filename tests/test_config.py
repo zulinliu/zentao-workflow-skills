@@ -9,9 +9,10 @@ from scripts.chandao_fetch.config import ChandaoConfig
 class ChandaoConfigTest(unittest.TestCase):
     def test_resolve_output_dir_is_fixed_workspace_chandao(self):
         config = ChandaoConfig()
-        output_dir = config.resolve_output_dir(r"D:\work\demo")
+        workspace = Path("/tmp") / "demo"
+        output_dir = config.resolve_output_dir(str(workspace))
 
-        self.assertTrue(output_dir.endswith("demo\\chandao"))
+        self.assertEqual(output_dir, str(workspace / "chandao"))
 
     def test_initialize_interactively_writes_global_config(self):
         with tempfile.TemporaryDirectory() as temp_dir:
